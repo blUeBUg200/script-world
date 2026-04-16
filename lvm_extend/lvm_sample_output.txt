@@ -1,0 +1,234 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║    LVM Volume Extension Utility — System Storage Report                     ║
+║                                                                              ║
+║    Hostname  : prod-elastic-01                                               ║
+║    OS        : Ubuntu 22.04.3 LTS                                            ║
+║    Kernel    : 5.15.0-91-generic                                             ║
+║    Date/Time : 2024-03-15 14:32:07 UTC                                       ║
+║    Report    : /var/log/lvm_reports/lvm_report_prod-elastic-01_2024-03-15_  ║
+║                14-32-07.txt                                                  ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. FILESYSTEM & MOUNT POINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Filesystem                              Size   Used  Avail  Use%  Mounted on
+  ───────────────────────────────────────────────────────────────────────────
+  /dev/mapper/ubuntu--vg-ubuntu--lv       98G    89G    4G    92%   /           ← RED (>=90%)
+  /dev/sda2                               2.0G  108M  1.7G    6%   /boot
+  /dev/sda1                               1.1G  6.1M  1.1G    1%   /boot/efi
+  /dev/mapper/ubuntu--vg-data--lv         500G  361G  114G    76%  /data        ← YELLOW (>=70%)
+  /dev/mapper/ubuntu--vg-opt--lv          200G   42G  147G    22%  /opt
+  tmpfs                                   7.7G     0  7.7G     0%  tmpfs
+
+  [INFO]  Colour: RED=>=90% used   YELLOW=>=70% used
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2. BLOCK DEVICES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  NAME                             SIZE   TYPE  FSTYPE      MOUNTPOINT  ROTA  LABEL
+  sda                              100G   disk
+  ├─sda1                           1.1G   part  vfat        /boot/efi   0
+  ├─sda2                           2G     part  ext4        /boot       0
+  └─sda3                           96.9G  part  LVM2_member             0
+    ├─ubuntu--vg-ubuntu--lv        98G    lvm   ext4        /           0
+    ├─ubuntu--vg-data--lv          500G   lvm   ext4        /data       0
+    └─ubuntu--vg-opt--lv           200G   lvm   ext4        /opt        0
+  sdb                              200G   disk                          0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3. LVM — PHYSICAL VOLUMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  PV Name                VG Name          Format   PV Size    PV Free
+  ──────────────────────────────────────────────────────────────────
+  /dev/sda3              ubuntu-vg        lvm2     96.90g     0g
+
+  ── Detailed PV Info ──
+    PV Name               /dev/sda3
+    VG Name               ubuntu-vg
+    PV Size               96.90 GiB / not usable 4.00 MiB
+    Allocatable           yes (but full)
+    PE Size               4.00 MiB
+    Total PE              24806
+    Free PE               0
+    Allocated PE          24806
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  4. LVM — VOLUME GROUPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  VG Name              #PVs   #LVs   VG Size      VG Free       ← YELLOW (< 1GB free)
+  ────────────────────────────────────────────────────────
+  ubuntu-vg            1      3      96.90g       0g
+
+  ── Detailed VG Info ──
+    VG Name               ubuntu-vg
+    Format                lvm2
+    VG Size               96.90 GiB
+    PE Size               4.00 MiB
+    Total PE              24806
+    Alloc PE / Size       24806 / 96.90 GiB
+    Free PE / Size        0 / 0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  5. LVM — LOGICAL VOLUMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  LV Path                          VG Name            LV Size    Type
+  ────────────────────────────────────────────────────────────────────
+  /dev/ubuntu-vg/ubuntu-lv         ubuntu-vg          98.00g     linear
+  /dev/ubuntu-vg/data-lv           ubuntu-vg          500.00g    linear
+  /dev/ubuntu-vg/opt-lv            ubuntu-vg          200.00g    linear
+
+  ── Detailed LV Info ──
+    LV Path                /dev/ubuntu-vg/ubuntu-lv
+    LV Name                ubuntu-lv
+    VG Name                ubuntu-vg
+    LV Size                98.00 GiB
+    LV UUID                Xt4mKr-bQ2z-wN8p-7VcE-mLsA-3jFd-9pRqTy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  6. /etc/fstab — PERSISTENT MOUNTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # /etc/fstab: static file system information.
+  UUID=b3f2c1a0-9d4e-4f6b-8a2c-7e1d3f5b9c2a  /            ext4  defaults  0 1
+  UUID=a1b2c3d4-e5f6-7890-abcd-ef1234567890  /boot        ext4  defaults  0 2
+  UUID=ABCD-1234                             /boot/efi    vfat  umask=0077 0 1
+  /dev/ubuntu-vg/data-lv                     /data        ext4  defaults  0 2
+  /dev/ubuntu-vg/opt-lv                      /opt         ext4  defaults  0 2
+  /swapfile                                  none         swap  sw        0 0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  7. INTERACTIVE — EXTEND A LOGICAL VOLUME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Review the storage info above before proceeding.
+  All operations are logged to: /var/log/lvm_reports/lvm_report_prod-elastic-01_2024-03-15_14-32-07.txt
+
+  Extend a Logical Volume now? [y/N]: y
+
+  User confirmed: proceed with extension
+
+  Select source of additional disk space:
+  [1] New physical disk          (e.g. /dev/sdb)
+  [2] New partition on disk      (e.g. /dev/sda3)
+  [3] VM/cloud disk was resized  (growpart + pvresize)
+  [4] VG already has free space  (skip to LV extend)
+
+  Choose [1-4]: 1
+
+  Selected source type: 1
+
+  Detected disks:
+  NAME   SIZE    TYPE  MODEL
+  sda    100G    disk  VMware Virtual S
+  sdb    200G    disk  VMware Virtual S
+
+  Enter new disk path (e.g. /dev/sdb): /dev/sdb
+  Input: /dev/sdb
+  [STEP]  pvcreate /dev/sdb
+    Physical volume "/dev/sdb" successfully created.
+  [OK]    PV created: /dev/sdb
+
+  Volume Groups:
+    VG        #PV #LV #SN Attr   VSize   VFree
+    ubuntu-vg   1   3   0 wz--n- 96.90g     0
+
+  Enter VG name (e.g. ubuntu-vg): ubuntu-vg
+  Selected VG: ubuntu-vg
+  [STEP]  vgextend ubuntu-vg /dev/sdb
+    Volume group "ubuntu-vg" successfully extended
+  [OK]    VG extended
+
+  Logical Volumes in 'ubuntu-vg':
+    LV        VG        Attr       LSize    Pool Origin
+    ubuntu-lv ubuntu-vg -wi-ao---- 98.00g
+    data-lv   ubuntu-vg -wi-ao---- 500.00g
+    opt-lv    ubuntu-vg -wi-ao---- 200.00g
+
+  Enter LV path (e.g. /dev/ubuntu-vg/ubuntu-lv): /dev/ubuntu-vg/ubuntu-lv
+  Selected LV: /dev/ubuntu-vg/ubuntu-lv
+
+  How much space to add?
+  [1] Use ALL available free space in VG
+  [2] Specify exact amount (e.g. 50G)
+
+  Choose [1/2]: 2
+
+  Enter size (e.g. 50G): 100G
+  Size input: 100G
+  [STEP]  lvextend -L +100G /dev/ubuntu-vg/ubuntu-lv
+    Size of logical volume ubuntu-vg/ubuntu-lv changed from 98.00 GiB (25088 extents)
+    to 198.00 GiB (50688 extents).
+    Logical volume ubuntu-vg/ubuntu-lv successfully resized.
+  [OK]    LV extended
+
+  [INFO]  Filesystem detected: ext4
+  [STEP]  resize2fs /dev/ubuntu-vg/ubuntu-lv
+    resize2fs 1.46.5 (30-Dec-2021)
+    Filesystem at /dev/ubuntu-vg/ubuntu-lv is mounted on /; on-line resizing required
+    old_desc_blocks = 13, new_desc_blocks = 25
+    The filesystem on /dev/ubuntu-vg/ubuntu-lv is now 51904512 (4k) blocks long.
+  [OK]    Filesystem resized (resize2fs)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  8. POST-EXTENSION STORAGE STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ── Updated df -h ──
+  Filesystem                              Size   Used  Avail  Use%  Mounted on
+  /dev/mapper/ubuntu--vg-ubuntu--lv       194G    89G  100G    48%  /           ← WAS 92%, NOW 48%
+  /dev/sda2                               2.0G  108M  1.7G     6%  /boot
+  /dev/sda1                               1.1G  6.1M  1.1G     1%  /boot/efi
+  /dev/mapper/ubuntu--vg-data--lv         500G  361G  114G    76%  /data
+  /dev/mapper/ubuntu--vg-opt--lv          200G   42G  147G    22%  /opt
+
+  ── Updated PVs ──
+  PV         VG        Fmt  Attr PSize    PFree
+  /dev/sda3  ubuntu-vg lvm2 a--  96.90g     0
+  /dev/sdb   ubuntu-vg lvm2 a--  200.00g  100.00g
+
+  ── Updated VGs ──
+  VG        #PV #LV #SN Attr   VSize   VFree
+  ubuntu-vg   2   3   0 wz--n- 296.90g 100.00g
+
+  ── Updated LVs ──
+  LV        VG        Attr       LSize
+  ubuntu-lv ubuntu-vg -wi-ao---- 198.00g    ← was 98.00g
+  data-lv   ubuntu-vg -wi-ao---- 500.00g
+  opt-lv    ubuntu-vg -wi-ao---- 200.00g
+
+  ── Updated lsblk ──
+  NAME                             SIZE    TYPE  FSTYPE      MOUNTPOINT
+  sda                              100G    disk
+  ├─sda1                           1.1G    part  vfat        /boot/efi
+  ├─sda2                           2G      part  ext4        /boot
+  └─sda3                           96.9G   part  LVM2_member
+    ├─ubuntu--vg-ubuntu--lv        198G    lvm   ext4        /
+    ├─ubuntu--vg-data--lv          500G    lvm   ext4        /data
+    └─ubuntu--vg-opt--lv           200G    lvm   ext4        /opt
+  sdb                              200G    disk  LVM2_member
+    └─ubuntu--vg-ubuntu--lv        198G    lvm   ext4        /
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  REPORT SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Hostname      : prod-elastic-01
+  OS            : Ubuntu 22.04.3 LTS
+  Kernel        : 5.15.0-91-generic
+  Completed at  : 2024-03-15 14:34:52 UTC
+  Report saved  : /var/log/lvm_reports/lvm_report_prod-elastic-01_2024-03-15_14-32-07.txt
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║            LVM Extension Completed Successfully                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+  Done!  Report: /var/log/lvm_reports/lvm_report_prod-elastic-01_2024-03-15_14-32-07.txt

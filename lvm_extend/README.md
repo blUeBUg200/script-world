@@ -15,7 +15,7 @@ An interactive LVM (Logical Volume Manager) Volume Extension Utility for Linux. 
 - **Flexible sizing** — extend using all available free space, or specify an exact size (e.g. `50G`)
 - **Auto filesystem resize** — detects `ext2`/`ext3`/`ext4` and `xfs` and runs the correct resize tool automatically
 - **New disk support** — optionally add a new physical volume to a volume group before extending
-- **Full audit trail** — every command and its output is saved to a timestamped report in `/var/log/lvm_reports/`
+- **Full audit trail** — every command and its output is saved to a timestamped HTML report in `./lvm_reports/`
 
 ---
 
@@ -78,24 +78,26 @@ Once launched, the script runs through the following sections automatically and 
 
 ### Section 7 (Interactive — guided extension)
 
-The script walks you through five prompts:
+The script first asks whether to proceed. If yes, it walks you through five prompts:
 
-**7a — Select a Volume Group**
+**7a — Select source of additional space**
+```
+[1] New physical disk         (e.g. /dev/sdb)
+[2] New partition on disk     (e.g. /dev/sda3)
+[3] VM/cloud disk was resized (growpart + pvresize)
+[4] VG already has free space (skip to LV extend)
+```
+Options 1 and 2 handle existing disk signatures safely — if a signature is detected you are prompted to wipe it before `pvcreate` runs. A force flag (`-ff`) is offered as a fallback if `pvcreate` fails.
+
+**7b — Select Volume Group + missing PV check**
 ```
 Available Volume Groups:
-  ubuntu-vg   (free: 0.00g)
-  data-vg     (free: 120.50g)
+  ubuntu-vg   18.00g total   0.00g free
+  data-vg    500.00g total  120.50g free
 
-Enter VG name to extend:
+Enter VG name (e.g. ubuntu-vg):
 ```
-
-**7b — Add a new disk (optional)**
-```
-Add a new physical volume to the VG first? [y/N]:
-```
-If yes, it shows available block devices and runs `pvcreate` + `vgextend` for you.
-
-**Missing PV check** — if the selected VG has missing physical volumes, you are offered three recovery options before proceeding:
+Immediately after selection, the VG is checked for missing Physical Volumes. If any are found, you are offered three recovery options before the extension can proceed:
 1. Remove the missing PV record (`vgreduce --removemissing --force`)
 2. Restore a replaced disk into the VG (`vgextend --restoremissing`)
 3. Abort and fix manually
@@ -138,28 +140,29 @@ Each line is tagged with a colour-coded prefix:
 | Tag | Colour | Meaning |
 |-----|--------|---------|
 | `[INFO]` | 🟢 Green | Informational message |
-| `[OK]` | 🟢 Green | Step completed successfully |
+| `[ OK ]` | 🟢 Green | Step completed successfully |
 | `[STEP]` | 🔵 Blue | LVM command being executed |
-| `[WARN]` | 🟡 Yellow | Advisory — low space, missing PV, unknown filesystem |
+| `[WARN]` | 🟡 Orange | Advisory — low space, missing PV, unknown filesystem |
 | `[ERROR]` | 🔴 Red | Fatal error — script will exit |
+| `[ OS ]` | 🔵 Cyan | Informational OS detail |
 
-### Report File
+### HTML Report
 
-Every run saves a full plain-text report to:
+Every run saves a styled HTML report to:
 
 ```
-/var/log/lvm_reports/lvm_report_<hostname>_<YYYY-MM-DD_HH-MM-SS>.txt
+./lvm_reports/lvm_report_<hostname>_<YYYY-MM-DD_HH-MM-SS>.html
 ```
 
-The report captures:
-- System details (hostname, OS, kernel, date/time)
-- All six audit sections (pre-extension state)
-- Every interactive input entered
-- Every LVM command run and its full output
-- Post-extension storage state
-- Completion timestamp
+The report includes:
+- Overall result verdict banner (Complete / Skipped / Aborted)
+- Operating system details panel
+- All six audit sections rendered as syntax-highlighted code panels (pre-extension state)
+- Extension actions table — each step with a name, detail, and colour-coded badge
+- Post-extension storage state (df, pvs, vgs, lvs after changes)
+- Legend for all badge types
 
-Reports are never overwritten — each run creates a new file, giving you a full audit trail.
+Reports are never overwritten — each run creates a new timestamped file, giving you a full audit trail.
 
 ---
 
@@ -180,11 +183,11 @@ Reports are never overwritten — each run creates a new file, giving you a full
 │   ├── lvm_extend.sh                      # Main script
 │   ├── README.md                          # This file
 │   └── system_sample_reports/             # Sample outputs for reference
-│       ├── lvm_report_server01_2026-04-08.txt
+│       ├── lvm_report_server01_2026-04-08.html
 │       └── terminal_output.png
 ```
 
-> Live reports are saved to `/var/log/lvm_reports/` on the host where the script is run.
+> Live reports are generated in `./lvm_reports/` relative to wherever the script is run from. The directory is created automatically on first run.
 
 ---
 
@@ -193,4 +196,5 @@ Reports are never overwritten — each run creates a new file, giving you a full
 - The script must be run as root (`sudo`) — it will exit immediately if the effective user ID is not 0
 - XFS filesystems must be mounted before they can be grown — `xfs_growfs` operates on the mount point, not the device
 - If your filesystem type is not ext4 or xfs, the LV will still be extended but you will need to resize the filesystem manually
-- The `/var/log/lvm_reports/` directory is created automatically on first run
+- The `./lvm_reports/` directory is created automatically on first run in the current working directory
+- If the extension is skipped at the prompt, an audit-only HTML report is still saved — useful for capturing a storage snapshot without making any changes

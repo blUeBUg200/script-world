@@ -34,7 +34,7 @@ Each script is designed to be:
     ├── lvm_extend.sh
     ├── README.md
     └── system_sample_reports/
-        ├── lvm_report_server01_2026-04-08.txt
+        ├── lvm_report_server01_2026-04-08.html
         └── terminal_output.png
 ```
 
@@ -79,19 +79,20 @@ See [`system_check/README.md`](system_check/README.md) for full documentation.
 
 ---
 
-### `lvm-extend/` — Interactive LVM Volume Extension Utility
+### `lvm_extend/` — Interactive LVM Volume Extension Utility
 
-An interactive guided tool for extending LVM logical volumes on Linux. Rather than requiring you to know and chain LVM commands manually, the script audits your full storage layout, walks you through selecting the volume group and logical volume to extend, handles missing PV recovery if the VG is degraded, runs the extension, and resizes the filesystem — all in one session. Every command and its output is saved to a full audit report.
+An interactive guided tool for extending LVM logical volumes on Linux. Rather than requiring you to know and chain LVM commands manually, the script audits your full storage layout, walks you through selecting the volume group and logical volume to extend, handles missing PV recovery if the VG is degraded, runs the extension, and resizes the filesystem — all in one session. Every step is captured in a styled HTML report saved to `./lvm_reports/`.
 
 **What it covers:**
 
 - Filesystem usage with colour-coded warnings (≥70% orange, ≥90% red)
 - Block device tree, physical volumes, volume groups, logical volumes, and fstab
-- Optional new disk addition (`pvcreate` + `vgextend`) before extending
+- New disk / partition / VM resize support before extending (`pvcreate`, `growpart`, `pvresize`)
 - Missing PV detection with guided recovery options before any extension proceeds
 - LV extension using all free space or a specific size
 - Automatic filesystem resize for ext2/ext3/ext4 (`resize2fs`) and xfs (`xfs_growfs`)
-- Pre- and post-extension storage snapshots in the report
+- Pre- and post-extension storage snapshots in the HTML report
+- Audit-only mode — if extension is skipped, a storage snapshot report is still saved
 
 ```bash
 chmod +x lvm_extend/lvm_extend.sh
@@ -112,11 +113,12 @@ All scripts in this repo follow the same conventions:
 # 1. Make executable
 chmod +x <folder>/<script>.sh
 
-# 2. Run with required arguments
-./<folder>/<script>.sh --option value
+# 2. Run (with arguments if required, or interactively)
+./<folder>/<script>.sh --option value   # system_check
+sudo ./<folder>/<script>.sh             # lvm_extend (root required)
 
 # 3. Review terminal output (colour-coded)
-# 4. Open the HTML report saved to ./<folder>/system_reports/
+# 4. Open the HTML report saved to ./<folder>/<script>_reports/
 ```
 
 ---
@@ -127,14 +129,20 @@ Every script produces two outputs:
 
 **Terminal** — colour-coded results printed immediately:
 
-| Colour | Tag | Meaning |
-|--------|-----|---------|
-| 🟢 Green | `[PASS]` / `[ OK ]` | Check passed or tool is present |
-| 🔴 Red | `[FAIL]` | Requirement not met — action required |
-| 🟡 Orange | `[WARN]` | Advisory — firewall active or package missing |
-| 🔵 Cyan | `[ OS ]` | Informational system detail |
+| Tag | Colour | Meaning |
+|-----|--------|---------|
+| `[PASS]` / `[ OK ]` | 🟢 Green | Check passed or step completed successfully |
+| `[FAIL]` / `[ERROR]` | 🔴 Red | Requirement not met or fatal error |
+| `[WARN]` | 🟡 Orange | Advisory — action may be needed |
+| `[STEP]` | 🔵 Blue | Command being executed (lvm_extend) |
+| `[ OS ]` | 🔵 Cyan | Informational OS detail |
 
-**HTML Report** — saved to `./system_reports/report_YYYY-MM-DD_HH-MM-SS.html` in the working directory. Each run creates a new file so you retain a full history.
+**HTML Report** — saved to a timestamped file in the script's report folder on every run. Each run creates a new file so you retain a full history. Reports share the same dark-themed design — OS panel, colour-coded sections, badge-tagged results, and a legend.
+
+| Script | Report location |
+|--------|----------------|
+| `system_check.sh` | `./system_reports/report_<timestamp>.html` |
+| `lvm_extend.sh` | `./lvm_reports/lvm_report_<hostname>_<timestamp>.html` |
 
 ---
 
@@ -143,7 +151,7 @@ Every script produces two outputs:
 - Bash 4.0+
 - Standard Linux coreutils (`awk`, `df`, `grep`, `uname`, `hostname`, `nproc`)
 - No third-party tools or package installs required to run the system-check script
-- `lvm2` package required for lvm-extend (see its README for install commands)
+- `lvm2` package required for `lvm_extend.sh` (see its README for per-distro install commands)
 
 Tested on Ubuntu 20.04+, Debian 11+, RHEL/CentOS 8+, Rocky Linux 8+, AlmaLinux 8+, Fedora 36+, Amazon Linux 2, Arch Linux, Alpine Linux.
 
@@ -156,8 +164,10 @@ Pull requests are welcome. When adding a new script please follow the existing c
 - One folder per script
 - A `README.md` inside the folder with usage, parameters, and output documentation
 - A `system_sample_reports/` folder with a sample HTML report and terminal screenshot
-- Inline `--help` / `-h` flag support
+- Inline `--help` / `-h` flag support for argument-driven scripts
+- Fully interactive scripts should validate root/permissions at the top and exit cleanly with a clear message
 - Compatible with `bash -n` syntax checking (no bashisms beyond Bash 4)
+- HTML report must use the shared dark-theme CSS design system (fonts, colour variables, OS panel, badge styles) for consistency across the toolkit
 
 ---
 
